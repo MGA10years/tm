@@ -1,0 +1,1094 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: content: https://gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+    <title>TimeMirror Ultimate Pro</title>
+    <style>
+        /* --- Adalo グローバルデザインシステム変数 --- */
+        :root {
+            --primary-grad: linear-gradient(135deg, #0ec87b 0%, #22c55e 35%, #3b82f6 75%, #6366f1 100%);
+            --schedule-grad: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --cases-grad: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            --explain-grad: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+            --adalo-green: #0ec87b;
+            --adalo-blue: #3182ce;
+            --adalo-red: #e53e3e;
+            --bg-main: #f8fafc;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --border-color: #e2e8f0;
+            --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.02), 0 2px 4px rgba(0, 0, 0, 0.01);
+        }
+
+        /* --- カテゴリー別専用カラー定義（Adalo準拠） --- */
+        .bg-study { background-color: #3b82f6 !important; color: #ffffff !important; }
+        .bg-club { background-color: #f97316 !important; color: #ffffff !important; }
+        .bg-sleep { background-color: #8b5cf6 !important; color: #ffffff !important; }
+        .bg-work { background-color: #ef4444 !important; color: #ffffff !important; }
+        .bg-free { background-color: #10b981 !important; color: #ffffff !important; }
+        .bg-meal { background-color: #f59e0b !important; color: #1e293b !important; }
+        .bg-other { background-color: #94a3b8 !important; color: #ffffff !important; }
+
+        /* --- 基本構造ベース --- */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            box-sizing: border-box;
+            padding-bottom: 110px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- 各種アニメーションビュー制御 --- */
+        .app-view {
+            display: none;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .app-view.active-view {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- 1. 比較画面用・超高精度グラデーションヘッダー --- */
+        .adalo-header {
+            background: var(--primary-grad);
+            padding: 45px 24px 35px 24px;
+            border-bottom-left-radius: 28px;
+            border-bottom-right-radius: 28px;
+            box-shadow: 0 12px 32px rgba(59, 130, 246, 0.15), 0 4px 12px rgba(16, 185, 129, 0.08);
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+        .adalo-header::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 70%);
+            pointer-events: none;
+        }
+        .header-tag {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.92);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        .header-main-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #ffffff;
+            margin: 8px 0;
+            letter-spacing: -0.8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+        .header-desc {
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.55;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* --- 各個別画面専用ヘッダーバリエーション --- */
+        .adalo-header.view-sched-header { background: var(--schedule-grad); box-shadow: 0 12px 32px rgba(16, 185, 129, 0.15); }
+        .adalo-header.view-cases-header { background: var(--cases-grad); box-shadow: 0 12px 32px rgba(59, 130, 246, 0.15); }
+        .adalo-header.view-expl-header { background: var(--explain-grad); box-shadow: 0 12px 32px rgba(99, 102, 241, 0.15); }
+
+        /* --- 2. サブメニュー・トグルスイッチ --- */
+        .toggle-menu {
+            display: flex;
+            gap: 24px;
+            padding: 16px 24px 0 24px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 12px;
+        }
+        .toggle-item {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--text-sub);
+            padding-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            transition: color 0.2s ease;
+        }
+        .toggle-item.active {
+            color: var(--adalo-green);
+        }
+        .toggle-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 3.5px;
+            background-color: var(--adalo-green);
+            border-radius: 2px;
+        }
+
+        /* --- 3. タイポグラフィとバッジスタイル --- */
+        .section-headline {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #0f172a;
+            padding: 22px 24px 4px 24px;
+            margin: 0;
+            letter-spacing: -0.3px;
+        }
+        .section-subheadline {
+            font-size: 0.82rem;
+            color: var(--text-sub);
+            padding: 0 24px;
+            margin: 0 0 18px 0;
+            line-height: 1.45;
+            font-weight: 500;
+        }
+        .badge-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 0 24px;
+            margin-bottom: 24px;
+        }
+        .badge-card {
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            padding: 7px 14px;
+            border-radius: 24px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #475569;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+            border: 1px solid var(--border-color);
+        }
+        .badge-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            margin-right: 7px;
+        }
+
+        /* --- 4. Adalo仕様 カードレイアウト --- */
+        .main-card {
+            background: #ffffff;
+            border-radius: 20px;
+            margin: 0 16px 20px 16px;
+            padding: 24px 18px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 16px;
+        }
+        .card-main-title {
+            font-size: 1.22rem;
+            font-weight: 900;
+            color: #0f172a;
+            margin: 0;
+            letter-spacing: -0.2px;
+        }
+        .card-main-subtitle {
+            font-size: 0.78rem;
+            color: var(--text-sub);
+            margin: 4px 0 0 0;
+            line-height: 1.45;
+            font-weight: 500;
+        }
+
+        /* --- 5. 24時間バーティカルタイムライン --- */
+        .graph-viewport {
+            display: flex;
+            position: relative;
+            margin-top: 20px;
+            height: 480px;
+        }
+        .graph-time-axis {
+            width: 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #94a3b8;
+            height: 480px;
+            border-right: 1px solid #edf2f7;
+            padding-right: 10px;
+            box-sizing: border-box;
+            font-variant-numeric: tabular-nums;
+            text-align: right;
+        }
+        .graph-columns-container {
+            display: flex;
+            flex: 1;
+            justify-content: space-around;
+            padding-left: 14px;
+            position: relative;
+            height: 480px;
+        }
+        .column-title-label {
+            position: absolute;
+            top: -28px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: #1e293b;
+            width: 44%;
+            text-align: center;
+            letter-spacing: -0.1px;
+        }
+        .label-left { left: 3%; }
+        .label-right { right: 3%; }
+
+        /* 背景の補助目盛りグリッド線 */
+        .grid-background {
+            position: absolute;
+            left: 14px; right: 0; top: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .grid-row {
+            height: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            box-sizing: border-box;
+        }
+        .grid-row:nth-child(3n) {
+            border-bottom: 1px dashed #cbd5e1;
+        }
+
+        /* 縦棒グラフベース構造 */
+        .bar-rail {
+            width: 44%;
+            height: 480px;
+            background-color: #f8fafc;
+            border-radius: 12px;
+            position: relative;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        /* 予定ブロック要素 */
+        .schedule-slice {
+            position: absolute;
+            left: 0; right: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.25);
+            box-sizing: border-box;
+            cursor: pointer;
+            padding: 5px 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .schedule-slice:active {
+            transform: scale(0.97);
+            filter: brightness(0.95);
+        }
+        .slice-text {
+            font-size: 0.68rem;
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            letter-spacing: -0.1px;
+        }
+
+        /* --- 6. アクションボタン --- */
+        .action-button-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 16px;
+            margin-bottom: 30px;
+            gap: 14px;
+        }
+        .adalo-btn {
+            background-color: var(--adalo-green);
+            color: #ffffff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 28px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 5px 15px rgba(14, 199, 123, 0.25);
+            transition: all 0.2s ease;
+        }
+        .adalo-btn-secondary {
+            background-color: #e6fffa;
+            color: #01985a;
+            border: 1px solid #b2f5ea;
+            box-shadow: none;
+        }
+        .adalo-btn:active {
+            transform: scale(0.98);
+            opacity: 0.95;
+        }
+
+        /* --- 7. 詳細ポップアップ表示カード --- */
+        .info-detail-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 18px;
+            margin: 0 16px 24px 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            border-left: 6px solid #94a3b8;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .info-detail-title {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0 0 6px 0;
+        }
+        .info-detail-text {
+            font-size: 0.78rem;
+            color: #475569;
+            line-height: 1.6;
+            margin: 0;
+            font-weight: 500;
+        }
+        /* --- 8. アニメーション付き入力モーダル --- */
+        .adalo-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .adalo-modal.modal-open {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-body {
+            background: #ffffff;
+            width: 100%;
+            max-width: 350px;
+            border-radius: 24px;
+            padding: 28px;
+            box-sizing: border-box;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        .adalo-modal.modal-open .modal-body {
+            transform: scale(1);
+        }
+        .modal-headline {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #0f172a;
+            margin: 0 0 6px 0;
+            letter-spacing: -0.2px;
+        }
+        .modal-subheadline {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin: 0 0 24px 0;
+            font-weight: 500;
+        }
+        .input-group {
+            margin-bottom: 18px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+        .adalo-input {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 0.9rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            box-sizing: border-box;
+            background-color: #f8fafc;
+            color: #1e293b;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .adalo-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .modal-footer-btns {
+            display: flex;
+            gap: 14px;
+            margin-top: 28px;
+        }
+        .btn-modal-save {
+            flex: 1;
+            background-color: var(--adalo-green);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(14, 199, 123, 0.2);
+        }
+        .btn-modal-close {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* --- 9. ナビゲーションバー --- */
+        .bottom-nav-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(8px);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 18px 0;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.03);
+            z-index: 1500;
+        }
+        .nav-tab {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #94a3b8;
+            font-size: 0.72rem;
+            font-weight: 800;
+            cursor: pointer;
+            gap: 4px;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        .nav-tab.active {
+            color: var(--adalo-green);
+            transform: translateY(-2px);
+        }
+        .nav-tab-icon {
+            font-size: 1.35rem;
+        }
+
+        /* --- 10. リスト・解説・分析用の追加コンポーネント --- */
+        .list-item-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.01);
+        }
+        .list-item-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .cat-pill {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            min-width: 58px;
+            text-align: center;
+        }
+        .btn-delete-mini {
+            background: #fee2e2;
+            color: #ef4444;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 14px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.35rem;
+            font-weight: 900;
+            color: #0f172a;
+            margin: 4px 0;
+        }
+        .stat-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-sub);
+        }
+    </style>
+</head>
+<body>
+    <!-- ==========================================
+         VIEW 1: 比較（メインタイムライン比較画面）
+         ========================================== -->
+    <div id="view-compare" class="app-view active-view">
+        <div class="adalo-header">
+            <p class="header-tag">TimeMirror Ultimate Pro</p>
+            <h1 class="header-main-title">TimeMirror</h1>
+            <p class="header-desc">予定と実際の行動を24時間タイムラインで並べて比較し、時間の使い方のズレを可視化します。</p>
+        </div>
+
+        <div class="toggle-menu">
+            <div class="toggle-item active" onclick="switchCompareMode('today', this)">📅 今日の比較</div>
+            <div class="toggle-item" onclick="switchCompareMode('summary', this)">📊 時間分析サマリー</div>
+        </div>
+
+        <div id="compare-sub-today">
+            <h2 class="section-headline">カテゴリー凡例</h2>
+            <p class="section-subheadline">ブロックをタップすると下のカードに詳細が表示されます</p>
+
+            <div class="badge-list">
+                <div class="badge-card"><span class="badge-dot bg-study"></span>勉強</div>
+                <div class="badge-card"><span class="badge-dot bg-club"></span>部活・運動</div>
+                <div class="badge-card"><span class="badge-dot bg-sleep"></span>睡眠</div>
+                <div class="badge-card"><span class="badge-dot bg-work"></span>バイト・仕事</div>
+                <div class="badge-card"><span class="badge-dot bg-free"></span>自由・趣味</div>
+                <div class="badge-card"><span class="badge-dot bg-meal"></span>食事・生活</div>
+                <div class="badge-card"><span class="badge-dot bg-other"></span>その他</div>
+            </div>
+
+            <div class="main-card">
+                <div class="card-header-flex">
+                    <div>
+                        <h3 class="card-main-title">24時間タイムライン比較</h3>
+                        <p class="card-main-subtitle">左：予定（Plan） ／ 右：実績（Actual）</p>
+                    </div>
+                </div>
+
+                <div class="graph-viewport">
+                    <div class="graph-time-axis" id="time-axis-labels"></div>
+                    <div class="graph-columns-container">
+                        <div class="grid-background" id="grid-bg-lines"></div>
+                        <div class="column-title-label label-left">予定 (Plan)</div>
+                        <div class="column-title-label label-right">実績 (Actual)</div>
+                        <div class="bar-rail" id="rail-plan"></div>
+                        <div class="bar-rail" id="rail-actual"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-detail-card" id="detail-popup-card">
+                <p class="info-detail-title" id="detail-title">💡 ブロックを選択して詳細を確認</p>
+                <p class="info-detail-text" id="detail-text">上のタイムライン上の予定・実績ブロックをタップすると、時間帯と所要時間がここに表示されます。</p>
+            </div>
+
+            <div class="action-button-row">
+                <button class="adalo-btn" style="flex:1;" onclick="openAddModal('plan')">＋ 予定を追加</button>
+                <button class="adalo-btn adalo-btn-secondary" style="flex:1;" onclick="openAddModal('actual')">＋ 実績を追加</button>
+            </div>
+        </div>
+
+        <div id="compare-sub-summary" style="display:none;">
+            <h2 class="section-headline">カテゴリー別時間集計</h2>
+            <p class="section-subheadline">予定と実績の合計時間を自動計算して比較します</p>
+            <div class="main-card" id="summary-content-area"></div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         VIEW 2: 予定・実績リスト管理画面
+         ========================================== -->
+    <div id="view-schedule" class="app-view">
+        <div class="adalo-header view-sched-header">
+            <p class="header-tag">Schedule Manager</p>
+            <h1 class="header-main-title">予定・実績管理</h1>
+            <p class="header-desc">登録されているすべてのスケジュールを確認・削除したり、サンプルデータをリセットできます。</p>
+        </div>
+
+        <div class="action-button-row" style="margin-top:20px;">
+            <button class="adalo-btn" style="flex:1;" onclick="openAddModal('plan')">＋ 予定登録</button>
+            <button class="adalo-btn adalo-btn-secondary" style="flex:1;" onclick="openAddModal('actual')">＋ 実績登録</button>
+        </div>
+
+        <h2 class="section-headline">登録済みの予定 (Plan)</h2>
+        <div style="padding: 10px 16px;" id="list-plan-container"></div>
+
+        <h2 class="section-headline">登録済みの実績 (Actual)</h2>
+        <div style="padding: 10px 16px;" id="list-actual-container"></div>
+
+        <div style="padding: 10px 16px 30px 16px;">
+            <button class="btn-modal-close" style="width:100%; background:#e2e8f0;" onclick="resetDemoData()">🔄 初期サンプルデータに戻す</button>
+        </div>
+    </div>
+    <!-- ==========================================
+         VIEW 3: 活用事例（ケーススタディ）画面
+         ========================================== -->
+    <div id="view-cases" class="app-view">
+        <div class="adalo-header view-cases-header">
+            <p class="header-tag">Case Studies</p>
+            <h1 class="header-main-title">活用事例</h1>
+            <p class="header-desc">TimeMirrorを使って生活リズムや学習時間を改善したモデルのタイムライン例です。</p>
+        </div>
+
+        <h2 class="section-headline">プリセットを読み込む</h2>
+        <p class="section-subheadline">ボタンを押すと、下のケースデータをあなたの比較画面に反映できます</p>
+
+        <div class="main-card">
+            <h3 class="card-main-title">📚 事例1：受験生の休日スケジュール改善</h3>
+            <p class="card-main-subtitle" style="margin-bottom:14px;">朝起きられず午前中の勉強が潰れていた状態を、昼寝の短縮と早寝で改善した例。</p>
+            <button class="adalo-btn" style="width:100%;" onclick="loadPreset('exam')">この事例をタイムラインに反映</button>
+        </div>
+
+        <div class="main-card">
+            <h3 class="card-main-title">⚽ 事例2：部活とバイトを両立する大学生</h3>
+            <p class="card-main-subtitle" style="margin-bottom:14px;">スキマ時間のスマホ閲覧（自由時間）を見直し、レポート作成時間を確保した例。</p>
+            <button class="adalo-btn" style="width:100%;" onclick="loadPreset('college')">この事例をタイムラインに反映</button>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         VIEW 4: アプリ解説・使い方ガイド画面
+         ========================================== -->
+    <div id="view-explain" class="app-view">
+        <div class="adalo-header view-expl-header">
+            <p class="header-tag">User Guide</p>
+            <h1 class="header-main-title">使い方・解説</h1>
+            <p class="header-desc">「理想の予定」と「現実の行動」のギャップを客観的に見つめ直すためのメソッドです。</p>
+        </div>
+
+        <h2 class="section-headline">3ステップ活用法</h2>
+        <div class="main-card">
+            <h3 class="card-main-title">1. 前日に「予定」を入れる</h3>
+            <p class="card-main-subtitle" style="margin-bottom:16px;">無理のない理想の1日のスケジュールを左側のレールに登録します。</p>
+
+            <h3 class="card-main-title">2. 当日の終わりに「実績」を記録</h3>
+            <p class="card-main-subtitle" style="margin-bottom:16px;">実際に何時に何をしていたかを思い出しながら右側のレールに登録します。</p>
+
+            <h3 class="card-main-title">3. ズレの原因を振り返る</h3>
+            <p class="card-main-subtitle">「予定より睡眠が長くなった」「自由時間が膨らんだ」などの差分を確認し、翌日の計画を調整します。</p>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         予定・実績追加モーダル
+         ========================================== -->
+    <div class="adalo-modal" id="add-modal">
+        <div class="modal-body">
+            <h2 class="modal-headline" id="modal-title">予定を追加</h2>
+            <p class="modal-subheadline">開始時刻・終了時刻とカテゴリーを入力してください</p>
+
+            <div class="input-group">
+                <label>内容・タイトル</label>
+                <input type="text" class="adalo-input" id="input-title" placeholder="例：英語の課題、アルバイト">
+            </div>
+
+            <div class="input-group">
+                <label>カテゴリー</label>
+                <select class="adalo-input" id="input-category">
+                    <option value="study">勉強</option>
+                    <option value="club">部活・運動</option>
+                    <option value="sleep">睡眠</option>
+                    <option value="work">バイト・仕事</option>
+                    <option value="free">自由・趣味</option>
+                    <option value="meal">食事・生活</option>
+                    <option value="other">その他</option>
+                </select>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <div class="input-group" style="flex:1;">
+                    <label>開始時間 (0〜24)</label>
+                    <input type="number" step="0.5" min="0" max="23.5" class="adalo-input" id="input-start" value="9">
+                </div>
+                <div class="input-group" style="flex:1;">
+                    <label>終了時間 (0.5〜24)</label>
+                    <input type="number" step="0.5" min="0.5" max="24" class="adalo-input" id="input-end" value="11">
+                </div>
+            </div>
+
+            <div class="modal-footer-btns">
+                <button class="btn-modal-close" onclick="closeAddModal()">閉じる</button>
+                <button class="btn-modal-save" onclick="saveScheduleItem()">保存する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         下部固定ナビゲーションバー
+         ========================================== -->
+    <nav class="bottom-nav-bar">
+        <div class="nav-tab active" onclick="switchView('compare', this)">
+            <span class="nav-tab-icon">📊</span>
+            <span>比較</span>
+        </div>
+        <div class="nav-tab" onclick="switchView('schedule', this)">
+            <span class="nav-tab-icon">📝</span>
+            <span>予定管理</span>
+        </div>
+        <div class="nav-tab" onclick="switchView('cases', this)">
+            <span class="nav-tab-icon">💡</span>
+            <span>事例</span>
+        </div>
+        <div class="nav-tab" onclick="switchView('explain', this)">
+            <span class="nav-tab-icon">📖</span>
+            <span>解説</span>
+        </div>
+    </nav>
+    <script>
+        /* --- カテゴリーマスター定義 --- */
+        const CATEGORIES = {
+            study: { label: '勉強', class: 'bg-study', color: '#3b82f6' },
+            club:  { label: '部活・運動', class: 'bg-club', color: '#f97316' },
+            sleep: { label: '睡眠', class: 'bg-sleep', color: '#8b5cf6' },
+            work:  { label: 'バイト・仕事', class: 'bg-work', color: '#ef4444' },
+            free:  { label: '自由・趣味', class: 'bg-free', color: '#10b981' },
+            meal:  { label: '食事・生活', class: 'bg-meal', color: '#f59e0b' },
+            other: { label: 'その他', class: 'bg-other', color: '#94a3b8' }
+        };
+
+        /* --- 初期サンプルデータ --- */
+        const DEFAULT_DATA = {
+            plan: [
+                { id: 1, title: '睡眠', category: 'sleep', start: 0, end: 7 },
+                { id: 2, title: '朝食・身支度', category: 'meal', start: 7, end: 8 },
+                { id: 3, title: '午前集中勉強', category: 'study', start: 8, end: 12 },
+                { id: 4, title: '昼食・休憩', category: 'meal', start: 12, end: 13 },
+                { id: 5, title: '部活トレーニング', category: 'club', start: 13, end: 16 },
+                { id: 6, title: '課題・復習', category: 'study', start: 16.5, end: 18.5 },
+                { id: 7, title: '夕食・入浴', category: 'meal', start: 18.5, end: 20 },
+                { id: 8, title: '自由時間', category: 'free', start: 20, end: 22.5 },
+                { id: 9, title: '就寝', category: 'sleep', start: 22.5, end: 24 }
+            ],
+            actual: [
+                { id: 101, title: '睡眠（寝坊）', category: 'sleep', start: 0, end: 8.5 },
+                { id: 102, title: '朝食・準備', category: 'meal', start: 8.5, end: 9.5 },
+                { id: 103, title: '英単語・数学', category: 'study', start: 9.5, end: 12 },
+                { id: 104, title: '昼食・スマホ', category: 'free', start: 12, end: 13.5 },
+                { id: 105, title: '部活トレーニング', category: 'club', start: 13.5, end: 16.5 },
+                { id: 106, title: '休憩・SNS', category: 'free', start: 16.5, end: 18.5 },
+                { id: 107, title: '夕食・入浴', category: 'meal', start: 18.5, end: 20 },
+                { id: 108, title: '夜間の課題', category: 'study', start: 20, end: 22 },
+                { id: 109, title: '動画視聴', category: 'free', start: 22, end: 23.5 },
+                { id: 110, title: '就寝', category: 'sleep', start: 23.5, end: 24 }
+            ]
+        };
+
+        /* --- 事例プリセットデータ --- */
+        const PRESET_DATA = {
+            exam: {
+                plan: [
+                    { id: 201, title: '睡眠', category: 'sleep', start: 0, end: 6.5 },
+                    { id: 202, title: '朝学習（英語）', category: 'study', start: 7, end: 9 },
+                    { id: 203, title: '過去問演習', category: 'study', start: 9.5, end: 12 },
+                    { id: 204, title: '昼食', category: 'meal', start: 12, end: 13 },
+                    { id: 205, title: '理系科目演習', category: 'study', start: 13, end: 17 },
+                    { id: 206, title: '夕食・風呂', category: 'meal', start: 18, end: 19.5 },
+                    { id: 207, title: '暗記・復習', category: 'study', start: 19.5, end: 22 },
+                    { id: 208, title: '自由・就寝準備', category: 'free', start: 22, end: 23 },
+                    { id: 209, title: '就寝', category: 'sleep', start: 23, end: 24 }
+                ],
+                actual: [
+                    { id: 211, title: '睡眠', category: 'sleep', start: 0, end: 7 },
+                    { id: 212, title: '朝学習（英語）', category: 'study', start: 7.5, end: 9 },
+                    { id: 213, title: '過去問演習', category: 'study', start: 9.5, end: 12 },
+                    { id: 214, title: '昼食・仮眠20分', category: 'meal', start: 12, end: 13.5 },
+                    { id: 215, title: '理系科目演習', category: 'study', start: 13.5, end: 17 },
+                    { id: 216, title: '夕食・風呂', category: 'meal', start: 18, end: 19.5 },
+                    { id: 217, title: '暗記・復習', category: 'study', start: 19.5, end: 21.5 },
+                    { id: 218, title: 'リラックス', category: 'free', start: 21.5, end: 23 },
+                    { id: 219, title: '就寝', category: 'sleep', start: 23, end: 24 }
+                ]
+            },
+            college: {
+                plan: [
+                    { id: 301, title: '睡眠', category: 'sleep', start: 0, end: 7.5 },
+                    { id: 302, title: '大学講義', category: 'study', start: 9, end: 12 },
+                    { id: 303, title: '昼食', category: 'meal', start: 12, end: 13 },
+                    { id: 304, title: 'レポート作成', category: 'study', start: 13, end: 15 },
+                    { id: 305, title: 'サークル活動', category: 'club', start: 15.5, end: 18 },
+                    { id: 306, title: 'アルバイト', category: 'work', start: 18.5, end: 22.5 },
+                    { id: 307, title: '帰宅・自由', category: 'free', start: 22.5, end: 24 }
+                ],
+                actual: [
+                    { id: 311, title: '睡眠', category: 'sleep', start: 0, end: 8 },
+                    { id: 312, title: '大学講義', category: 'study', start: 9, end: 12 },
+                    { id: 313, title: '学食・雑談', category: 'free', start: 12, end: 14 },
+                    { id: 314, title: 'レポート作成', category: 'study', start: 14, end: 15.5 },
+                    { id: 315, title: 'サークル活動', category: 'club', start: 15.5, end: 18 },
+                    { id: 316, title: 'アルバイト', category: 'work', start: 18.5, end: 22.5 },
+                    { id: 317, title: '帰宅・就寝準備', category: 'meal', start: 22.5, end: 24 }
+                ]
+            }
+        };
+        let appData = JSON.parse(localStorage.getItem('timeMirrorData')) || JSON.parse(JSON.stringify(DEFAULT_DATA));
+        let currentModalTarget = 'plan';
+
+        function saveToStorage() {
+            localStorage.setItem('timeMirrorData', JSON.stringify(appData));
+        }
+
+        function formatTime(val) {
+            const h = Math.floor(val);
+            const m = (val % 1) === 0.5 ? '30' : '00';
+            return `${String(h).padStart(2, '0')}:${m}`;
+        }
+
+        /* --- タイムライン軸・背景グリッド生成 --- */
+        function initGridAndAxis() {
+            const axisEl = document.getElementById('time-axis-labels');
+            const bgEl = document.getElementById('grid-bg-lines');
+            axisEl.innerHTML = '';
+            bgEl.innerHTML = '';
+
+            for (let h = 0; h <= 24; h += 3) {
+                const span = document.createElement('span');
+                span.textContent = `${String(h).padStart(2, '0')}:00`;
+                axisEl.appendChild(span);
+            }
+            for (let i = 0; i < 24; i++) {
+                const row = document.createElement('div');
+                row.className = 'grid-row';
+                bgEl.appendChild(row);
+            }
+        }
+
+        /* --- タイムラインブロック描画 --- */
+        function renderTimeline() {
+            const railPlan = document.getElementById('rail-plan');
+            const railActual = document.getElementById('rail-actual');
+            railPlan.innerHTML = '';
+            railActual.innerHTML = '';
+
+            ['plan', 'actual'].forEach(type => {
+                const targetRail = type === 'plan' ? railPlan : railActual;
+                const typeLabel = type === 'plan' ? '予定' : '実績';
+
+                appData[type].forEach(item => {
+                    const cat = CATEGORIES[item.category] || CATEGORIES.other;
+                    const topPx = (item.start / 24) * 480;
+                    const heightPx = Math.max(((item.end - item.start) / 24) * 480, 14);
+
+                    const slice = document.createElement('div');
+                    slice.className = `schedule-slice ${cat.class}`;
+                    slice.style.top = `${topPx}px`;
+                    slice.style.height = `${heightPx}px`;
+
+                    slice.innerHTML = `<span class="slice-text">${item.title}</span>`;
+                    slice.onclick = () => showDetail(item, typeLabel, cat);
+                    targetRail.appendChild(slice);
+                });
+            });
+        }
+
+        /* --- ブロックタップ時の詳細カード更新 --- */
+        function showDetail(item, typeLabel, cat) {
+            const card = document.getElementById('detail-popup-card');
+            const titleEl = document.getElementById('detail-title');
+            const textEl = document.getElementById('detail-text');
+            const duration = item.end - item.start;
+
+            card.style.borderLeftColor = cat.color;
+            titleEl.textContent = `【${typeLabel}】${item.title}（${cat.label}）`;
+            textEl.textContent = `時間帯：${formatTime(item.start)} 〜 ${formatTime(item.end)}（所要時間：${duration}時間）`;
+        }
+
+        /* --- 予定・実績管理リスト描画 --- */
+        function renderManageLists() {
+            ['plan', 'actual'].forEach(type => {
+                const container = document.getElementById(`list-${type}-container`);
+                container.innerHTML = '';
+
+                const sorted = [...appData[type]].sort((a, b) => a.start - b.start);
+                if (sorted.length === 0) {
+                    container.innerHTML = '<p style="color:#94a3b8; font-size:0.82rem; padding:8px;">登録データがありません</p>';
+                    return;
+                }
+
+                sorted.forEach(item => {
+                    const cat = CATEGORIES[item.category] || CATEGORIES.other;
+                    const card = document.createElement('div');
+                    card.className = 'list-item-card';
+                    card.innerHTML = `
+                        <div class="list-item-left">
+                            <span class="cat-pill ${cat.class}">${cat.label}</span>
+                            <div>
+                                <div style="font-weight:800; font-size:0.9rem; color:#0f172a;">${item.title}</div>
+                                <div style="font-size:0.75rem; color:#64748b; font-weight:600;">${formatTime(item.start)} 〜 ${formatTime(item.end)}（${item.end - item.start}h）</div>
+                            </div>
+                        </div>
+                        <button class="btn-delete-mini" onclick="deleteItem('${type}', ${item.id})">削除</button>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+        }
+        /* --- カテゴリー別時間分析サマリー描画 --- */
+        function renderSummary() {
+            const area = document.getElementById('summary-content-area');
+            let html = '<div class="stat-grid">';
+
+            Object.keys(CATEGORIES).forEach(key => {
+                const cat = CATEGORIES[key];
+                const planSum = appData.plan.filter(i => i.category === key).reduce((s, i) => s + (i.end - i.start), 0);
+                const actualSum = appData.actual.filter(i => i.category === key).reduce((s, i) => s + (i.end - i.start), 0);
+                const diff = actualSum - planSum;
+                const diffStr = diff > 0 ? `+${diff}h` : `${diff}h`;
+
+                html += `
+                    <div class="stat-box">
+                        <span class="cat-pill ${cat.class}" style="display:inline-block; margin-bottom:6px;">${cat.label}</span>
+                        <div class="stat-value">${actualSum}h <span style="font-size:0.75rem; color:#64748b;">/ 予定${planSum}h</span></div>
+                        <div class="stat-label">差分: ${diffStr}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            area.innerHTML = html;
+        }
+
+        /* --- 画面・サブメニュー切り替え --- */
+        function switchView(viewName, tabEl) {
+            document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active-view'));
+            document.getElementById(`view-${viewName}`).classList.add('active-view');
+
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            tabEl.classList.add('active');
+
+            if (viewName === 'schedule') renderManageLists();
+            if (viewName === 'compare') {
+                renderTimeline();
+                renderSummary();
+            }
+            window.scrollTo(0, 0);
+        }
+
+        function switchCompareMode(mode, el) {
+            document.querySelectorAll('.toggle-item').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+
+            if (mode === 'today') {
+                document.getElementById('compare-sub-today').style.display = 'block';
+                document.getElementById('compare-sub-summary').style.display = 'none';
+            } else {
+                document.getElementById('compare-sub-today').style.display = 'none';
+                document.getElementById('compare-sub-summary').style.display = 'block';
+                renderSummary();
+            }
+        }
+
+        /* --- モーダル制御・追加・削除 --- */
+        function openAddModal(target) {
+            currentModalTarget = target;
+            document.getElementById('modal-title').textContent = target === 'plan' ? '予定（Plan）を追加' : '実績（Actual）を追加';
+            document.getElementById('input-title').value = '';
+            document.getElementById('add-modal').classList.add('modal-open');
+        }
+
+        function closeAddModal() {
+            document.getElementById('add-modal').classList.remove('modal-open');
+        }
+
+        function saveScheduleItem() {
+            const title = document.getElementById('input-title').value.trim();
+            const category = document.getElementById('input-category').value;
+            const start = parseFloat(document.getElementById('input-start').value);
+            const end = parseFloat(document.getElementById('input-end').value);
+
+            if (!title) {
+                alert('内容・タイトルを入力してください。');
+                return;
+            }
+            if (isNaN(start) || isNaN(end) || start >= end || start < 0 || end > 24) {
+                alert('開始時間と終了時間を正しく設定してください（0〜24の間、開始＜終了）。');
+                return;
+            }
+
+            appData[currentModalTarget].push({
+                id: Date.now(),
+                title,
+                category,
+                start,
+                end
+            });
+
+            saveToStorage();
+            renderTimeline();
+            renderManageLists();
+            renderSummary();
+            closeAddModal();
+        }
+
+        function deleteItem(type, id) {
+            appData[type] = appData[type].filter(item => item.id !== id);
+            saveToStorage();
+            renderTimeline();
+            renderManageLists();
+            renderSummary();
+        }
+
+        function loadPreset(presetKey) {
+            appData = JSON.parse(JSON.stringify(PRESET_DATA[presetKey]));
+            saveToStorage();
+            renderTimeline();
+            renderManageLists();
+            renderSummary();
+            switchView('compare', document.querySelectorAll('.nav-tab'));
+        }
+
+        function resetDemoData() {
+            appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+            saveToStorage();
+            renderTimeline();
+            renderManageLists();
+            renderSummary();
+            alert('初期サンプルデータに戻しました。');
+        }
+
+        /* --- 初期化実行 --- */
+        window.addEventListener('DOMContentLoaded', () => {
+            initGridAndAxis();
+            renderTimeline();
+            renderManageLists();
+            renderSummary();
+        });
+    </script>
+</body>
+</html>
